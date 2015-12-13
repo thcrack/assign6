@@ -28,12 +28,14 @@ class FlightType
 int state = GameState.START;
 int currentType = EnemysShowingType.STRAIGHT;
 int enemyCount = 8;
+int maxBullet = 5;
 Enemy[] enemys = new Enemy[enemyCount];
 Fighter fighter;
 Background bg;
 FlameMgr flameMgr;
 Treasure treasure;
 HPDisplay hpDisplay;
+Bullet [] bullet = new Bullet[maxBullet];
 
 boolean isMovingUp;
 boolean isMovingDown;
@@ -41,7 +43,8 @@ boolean isMovingLeft;
 boolean isMovingRight;
 
 int time;
-int wait = 4000;
+int wait = 6000;
+
 
 
 
@@ -52,6 +55,9 @@ void setup () {
 	treasure = new Treasure();
 	hpDisplay = new HPDisplay();
 	fighter = new Fighter(20);
+  for(int i = 0; i < maxBullet; i++){
+    bullet[i] = new Bullet();
+  }
 }
 
 void draw()
@@ -64,7 +70,12 @@ void draw()
 		treasure.draw();
 		flameMgr.draw();
 		fighter.draw();
-
+          for(int i = 0; i < maxBullet; i++){
+            if(bullet[i].state){
+              bullet[i].draw();
+              bullet[i].move();
+            }
+          }
 		//enemys
 		if(millis() - time >= wait){
 			addEnemy(currentType++);
@@ -76,16 +87,25 @@ void draw()
 				enemys[i].move();
 				enemys[i].draw();
 				if (enemys[i].isCollideWithFighter()) {
-					fighter.hpValueChange(-20);
+					fighter.hpValueChange(-enemys[i].damage);
 					flameMgr.addFlame(enemys[i].x, enemys[i].y);
 					enemys[i]=null;
-				}
+                          }
+				
+                          else if (enemys[i].isCollideWithBullet()) {
+                            enemys[i].hp -= 1;
+                            if(enemys[i].hp <= 0){
+                              flameMgr.addFlame(enemys[i].x, enemys[i].y);
+                              enemys[i]=null;
+                            }
+                          }
 				else if (enemys[i].isOutOfBorder()) {
 					enemys[i]=null;
 				}
 			}
 		}
 		// 這地方應該加入Fighter 血量顯示UI
+          hpDisplay.updateWithFighterHP(fighter.hp);
 		
 	}
 	else if (state == GameState.END) {
@@ -136,4 +156,3 @@ void keyReleased(){
     }
   }
 }
-
