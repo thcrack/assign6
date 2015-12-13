@@ -32,7 +32,14 @@ class Fighter{
 	}
 
 	void shoot() {
-		
+    //pick a bullet
+    for(int i = 0; i < maxBullet; i++){
+      if(!bullet[i].state){
+        bullet[i].shoot();
+        bullet[i].state = true;
+        break;
+      }
+    }
 	}
 
 	void move(int direct) {
